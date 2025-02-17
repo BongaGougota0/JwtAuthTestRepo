@@ -35,7 +35,7 @@ public class JWTService {
         return Keys.hmacShaKeyFor(decodedKey);
     }
 
-    private String extractUsername(String token) {
+    public String extractUsername(String token) {
         return getClaims(token).getSubject();
     }
 

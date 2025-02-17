@@ -13,14 +13,18 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import za.co.bonga.jwt_practice.security.JwtAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class AppSecurityConfiguration {
     private final AppUserDetailsService appUserDetailsService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public AppSecurityConfiguration(AppUserDetailsService appUserDetailsService) {
+    public AppSecurityConfiguration(AppUserDetailsService appUserDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.appUserDetailsService = appUserDetailsService;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     @Bean
@@ -29,14 +33,15 @@ public class AppSecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(registry -> {
                     registry.requestMatchers("/api/home/").authenticated();
-                    registry.requestMatchers("/api/getbyid/").authenticated();
-                    registry.requestMatchers("/api/getbyemail/").authenticated();
+                    registry.requestMatchers("/api/getbyid**").authenticated();
+                    registry.requestMatchers("/api/getbyemail**").authenticated();
                     registry.requestMatchers("/api/login/").permitAll();
                     registry.requestMatchers("/api/register/").permitAll();
                     registry.requestMatchers("/api/all/").permitAll();
                     registry.requestMatchers("/api/dashboard/**").hasRole("ADMIN");
                 })
                 .formLogin(AbstractAuthenticationFilterConfigurer::permitAll)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
